@@ -4,17 +4,16 @@ import User from '../auth/user.model.js';
 import cloudinary from '../../config/cloudinary.js';
 import streamifier from 'streamifier';
 
-// Helper to upload a single file buffer to Cloudinary
-const uploadToCloudinary = (fileBuffer) => {
+// Helper: Upload a single file buffer to Cloudinary
+const uploadToCloudinary = (fileBuffer, mimetype) => {
   return new Promise((resolve, reject) => {
-    const stream = cloudinary.uploader.upload_stream(
-      { folder: 'your-app-folder', resource_type: 'auto' }, // change folder if you want
+    cloudinary.uploader.upload_stream(
+      { folder: 'community-posts', resource_type: mimetype.startsWith('image/') ? 'image' : 'auto' },
       (error, result) => {
         if (result) resolve(result);
         else reject(error);
       }
-    );
-    streamifier.createReadStream(fileBuffer).pipe(stream);
+    ).end(fileBuffer);
   });
 };
 
@@ -27,14 +26,13 @@ async function deletePostAndReplies(postId) {
   await Post.deleteOne({ _id: postId });
 }
 
-// Create post with attachments OR content OR both
+// CREATE POST (with attachments OR content OR both)
 export const createPost = async (req, res) => {
   try {
     const { content, type, parent } = req.body;
     const hasContent = content && content.trim() !== '';
     const hasAttachments = req.files && req.files.length > 0;
 
-    // Allow post if either content or at least one attachment is present
     if (!hasContent && !hasAttachments) {
       return res.status(400).json({ message: 'Content or at least one attachment is required' });
     }
@@ -47,6 +45,7 @@ export const createPost = async (req, res) => {
       return res.status(400).json({ message: 'Invalid post type' });
     }
 
+    // Admin/member check
     let isAdmin = false;
     if (Array.isArray(community.admins)) {
       isAdmin = community.admins.some(adminId => adminId.equals(req.user._id));
@@ -54,7 +53,6 @@ export const createPost = async (req, res) => {
     if (community.owner && community.owner.equals(req.user._id)) {
       isAdmin = true;
     }
-
     if (type === 'main' && !isAdmin) {
       return res.status(403).json({ message: 'Not authorized to post in main section' });
     } else if (type !== 'main') {
@@ -79,7 +77,7 @@ export const createPost = async (req, res) => {
     if (hasAttachments) {
       attachments = await Promise.all(
         req.files.map(async (file) => {
-          const result = await uploadToCloudinary(file.buffer);
+          const result = await uploadToCloudinary(file.buffer, file.mimetype);
           return {
             url: result.secure_url,
             public_id: result.public_id,
@@ -94,7 +92,7 @@ export const createPost = async (req, res) => {
     const post = await Post.create({
       community: community._id,
       author: req.user._id,
-      content: hasContent ? content : '', // Save as empty string if no content
+      content: hasContent ? content : '',
       type,
       parent: parent || null,
       mentions,
@@ -108,6 +106,7 @@ export const createPost = async (req, res) => {
   }
 };
 
+// GET POSTS
 export const getPosts = async (req, res) => {
   try {
     const { type, page = 1, limit = 100 } = req.query;
@@ -119,7 +118,7 @@ export const getPosts = async (req, res) => {
     };
 
     const posts = await Post.find(query)
-      .populate('author', 'name email')
+      .populate('author', 'name email avatar')
       .populate('mentions', 'name')
       .sort({ pinned: -1, createdAt: 1 })
       .skip(skip)
@@ -139,10 +138,11 @@ export const getPosts = async (req, res) => {
   }
 };
 
+// GET REPLIES
 export const getReplies = async (req, res) => {
   try {
     const replies = await Post.find({ parent: req.params.postId })
-      .populate('author', 'name email')
+      .populate('author', 'name email avatar')
       .sort({ createdAt: 1 });
     res.json(replies);
   } catch (error) {
@@ -151,6 +151,7 @@ export const getReplies = async (req, res) => {
   }
 };
 
+// EDIT POST
 export const editPost = async (req, res) => {
   try {
     const post = await Post.findById(req.params.postId);
@@ -181,6 +182,7 @@ export const editPost = async (req, res) => {
   }
 };
 
+// DELETE POST (and all replies)
 export const deletePost = async (req, res) => {
   try {
     const post = await Post.findById(req.params.postId);
@@ -209,9 +211,14 @@ export const deletePost = async (req, res) => {
   }
 };
 
+// ADD OR REMOVE REACTION
 export const addReaction = async (req, res) => {
   try {
-    const { reaction } = req.body;
+    const { reaction } = req.body; // e.g. 'like' or 'love'
+    if (!['like', 'love'].includes(reaction)) {
+      return res.status(400).json({ message: 'Invalid reaction type' });
+    }
+
     const post = await Post.findById(req.params.postId);
     if (!post) return res.status(404).json({ message: 'Post not found' });
 

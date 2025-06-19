@@ -47,7 +47,7 @@ const ReplyForm = ({ postId, communityId, onReply }) => {
           <Button
             type="submit"
             variant="contained"
-            color="secondary"  // This applies your purple theme color
+            color="secondary"
             size="small"
             disabled={loading || !content.trim()}
             sx={{
@@ -60,7 +60,6 @@ const ReplyForm = ({ postId, communityId, onReply }) => {
               minWidth: 110,
               minHeight: 38,
               letterSpacing: 0.5,
-              // Optional: explicit color overrides for exact purple shades
               backgroundColor: '#7b1fa2',
               color: '#fff',
               boxShadow: '0 2px 8px rgba(123,31,162,0.3)',

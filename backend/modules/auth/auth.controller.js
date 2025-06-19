@@ -12,32 +12,21 @@ const upload = multer({ storage });
 // Register user
 const registerUser = async (req, res) => {
   let { name, username, email, password } = req.body;
-
-  // 1. Validate all fields
   if (!name || !username || !email || !password) {
     return res.status(400).json({ message: 'All fields are required' });
   }
-
-  // 2. Trim and normalize inputs
   email = email.trim();
   username = username.trim();
-
-  // 3. Case-insensitive search for existing user
   const userExists = await User.findOne({
     $or: [
       { email: { $regex: new RegExp('^' + email + '$', 'i') } },
       { username: { $regex: new RegExp('^' + username + '$', 'i') } }
     ]
   });
-  console.log('Checking for existing user:', email, username, 'Found:', userExists);
-
   if (userExists) return res.status(400).json({ message: 'User already exists' });
-
-  // 4. Create user
   const salt = await bcrypt.genSalt(10);
   const hashedPassword = await bcrypt.hash(password, salt);
   const user = await User.create({ name, username, email, password: hashedPassword });
-
   res.status(201).json({
     user: { _id: user._id, name: user.name, email: user.email, username: user.username },
     token: generateToken(user._id)
@@ -49,7 +38,7 @@ const authUser = async (req, res) => {
   const { email, password } = req.body;
   const user = await User.findOne({ email });
   if (user && (await bcrypt.compare(password, user.password))) {
-    res.json({ _id: user._id, name: user.name, email: user.email, token: generateToken(user._id) });
+    res.json({ _id: user._id, name: user.name, email: user.email, username: user.username, token: generateToken(user._id) });
   } else {
     res.status(401).json({ message: 'Invalid credentials' });
   }
@@ -77,18 +66,14 @@ const getUserProfile = async (req, res) => {
 // Update a user's profile (with optional avatar upload)
 const updateUserProfile = async (req, res) => {
   try {
-    // Only allow editing own profile
     if (req.user._id.toString() !== req.params.id) {
       return res.status(403).json({ message: 'Not authorized' });
     }
-
     let updateData = {
       name: req.body.name,
       bio: req.body.bio,
       interests: req.body.interests ? req.body.interests.split(',').map(i => i.trim()) : undefined,
     };
-
-    // Handle avatar upload if present
     if (req.file) {
       const result = await new Promise((resolve, reject) => {
         const stream = cloudinary.uploader.upload_stream(
@@ -102,15 +87,24 @@ const updateUserProfile = async (req, res) => {
       });
       updateData.avatar = result.secure_url;
     }
-
-    // Remove undefined fields so they don't overwrite existing data
     Object.keys(updateData).forEach(key => updateData[key] === undefined && delete updateData[key]);
-
     const user = await User.findByIdAndUpdate(req.params.id, updateData, { new: true });
     res.json(user);
   } catch (error) {
     res.status(400).json({ message: 'Update failed', error: error.message });
   }
+};
+
+// Block a user
+const blockUser = async (req, res) => {
+  const blockerId = req.user._id;
+  const blockedId = req.params.id;
+  if (blockerId.toString() === blockedId) {
+    return res.status(400).json({ message: "You can't block yourself." });
+  }
+  // Add your block logic here (e.g., add to blockedUsers array)
+  // For demo:
+  res.json({ message: 'User blocked (demo, implement logic as needed).' });
 };
 
 export {
@@ -119,5 +113,6 @@ export {
   deleteAccount,
   getUserProfile,
   updateUserProfile,
-  upload
+  upload,
+  blockUser
 };

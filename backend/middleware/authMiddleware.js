@@ -13,10 +13,10 @@ const protect = async (req, res, next) => {
     req.user = user;
     next();
   } catch (error) {
-    res.status(401).json({ 
-      message: error.name === 'TokenExpiredError' 
-        ? 'Session expired' 
-        : 'Not authorized' 
+    res.status(401).json({
+      message: error.name === 'TokenExpiredError'
+        ? 'Session expired'
+        : 'Not authorized'
     });
   }
 };

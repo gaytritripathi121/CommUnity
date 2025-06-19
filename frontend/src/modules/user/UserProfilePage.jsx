@@ -1,38 +1,62 @@
 import React, { useEffect, useState } from 'react';
-import { useParams, useNavigate } from 'react-router-dom';
-import { Container, Typography, Button, Box } from '@mui/material';
+import { useParams } from 'react-router-dom';
+import { Container, Typography, Box, CircularProgress, Fade } from '@mui/material';
 import UserProfileCard from './UserProfileCard';
 import UserAPI from './UserAPI';
 
 const UserProfilePage = ({ userId: propUserId }) => {
   const params = useParams();
-  const navigate = useNavigate();
   const userId = propUserId || params.userId;
   const [user, setUser] = useState(null);
+  const [loading, setLoading] = useState(true);
   const currentUserId = localStorage.getItem('userId');
 
   useEffect(() => {
     if (!userId) return;
-    UserAPI.getUser(userId).then(setUser).catch(console.error);
+    setLoading(true);
+    UserAPI.getUser(userId)
+      .then(data => {
+        setUser(data);
+        setLoading(false);
+      })
+      .catch(() => setLoading(false));
   }, [userId]);
 
-  if (!user) return <Typography>Loading...</Typography>;
-
   return (
-    <Container maxWidth="sm" sx={{ mt: 4, textAlign: 'center' }}>
-      <UserProfileCard user={user} />
-
-      {userId === currentUserId && (
-        <Box sx={{ mt: 2 }}>
-          <Button
-            variant="contained"
-            onClick={() => navigate('/settings/edit-profile')}
-          >
-            Edit Profile
-          </Button>
-        </Box>
-      )}
-    </Container>
+    <Box
+      sx={{
+        minHeight: '100vh',
+        background: 'linear-gradient(120deg, #ede7f6 0%, #fff 100%)',
+        py: 8,
+      }}
+    >
+      <Container maxWidth="sm">
+        {loading ? (
+          <Fade in={loading}>
+            <Box sx={{ textAlign: 'center', mt: 10 }}>
+              <CircularProgress color="secondary" />
+              <Typography sx={{ mt: 2 }} color="text.secondary">
+                Loading profile...
+              </Typography>
+            </Box>
+          </Fade>
+        ) : !user ? (
+          <Fade in={!loading}>
+            <Box sx={{ textAlign: 'center', mt: 10 }}>
+              <Typography color="error" variant="h6">
+                User not found.
+              </Typography>
+            </Box>
+          </Fade>
+        ) : (
+          <Fade in={!loading}>
+            <Box>
+              <UserProfileCard user={user} isCurrentUser={userId === currentUserId} />
+            </Box>
+          </Fade>
+        )}
+      </Container>
+    </Box>
   );
 };
 

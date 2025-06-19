@@ -1,12 +1,17 @@
 import React from 'react';
 import { AppBar, Toolbar, Typography, Button } from '@mui/material';
 import { Link, useNavigate } from 'react-router-dom';
+import { useSelector, useDispatch } from 'react-redux';
+import { logout } from '../../modules/auth/authSlice'; // adjust path as needed
 
-const Navbar = ({ isLoggedIn, onLogout }) => {
+const Navbar = ({ onLogout }) => {
   const navigate = useNavigate();
+  const dispatch = useDispatch();
+  const user = useSelector((state) => state.auth.user);
 
   const handleLogout = () => {
     if (onLogout) onLogout();
+    dispatch(logout());
     navigate('/login');
   };
 
@@ -14,7 +19,7 @@ const Navbar = ({ isLoggedIn, onLogout }) => {
     <AppBar
       position="static"
       sx={{
-        backgroundColor: '#4a148c', // Deep purple to match buttons
+        backgroundColor: '#4a148c',
         boxShadow: 'none',
       }}
     >
@@ -22,7 +27,7 @@ const Navbar = ({ isLoggedIn, onLogout }) => {
         <Typography variant="h6" sx={{ flexGrow: 1, fontWeight: 'bold' }}>
           CommUnity Connect
         </Typography>
-        {!isLoggedIn && (
+        {!user && (
           <>
             <Button
               component={Link}
@@ -51,7 +56,7 @@ const Navbar = ({ isLoggedIn, onLogout }) => {
             </Button>
           </>
         )}
-        {isLoggedIn && (
+        {user && (
           <>
             <Button
               component={Link}

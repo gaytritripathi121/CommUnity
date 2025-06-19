@@ -1,9 +1,13 @@
-import axios from '../../shared/axios'; // Adjust path as needed
+import axios from '../../shared/axios';
 
-const getMessages = (userId, recipientId) =>
-  axios.get(`/chat/${userId}/${recipientId}`).then(res => res.data);
+const getMessages = async (userId, recipientId) => {
+  const res = await axios.get(`/chat/${userId}/${recipientId}`);
+  return res.data;
+};
 
-const sendMessage = (userId, recipientId, text) =>
-  axios.post(`/chat/${recipientId}`, { text }).then(res => res.data);
+const sendMessage = async (userId, recipientId, text) => {
+  const res = await axios.post(`/chat/${recipientId}`, { text });
+  return res.data;
+};
 
 export default { getMessages, sendMessage };

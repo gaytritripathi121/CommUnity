@@ -15,6 +15,8 @@ import {
   FormControlLabel,
   IconButton,
   InputAdornment,
+  Snackbar,
+  Alert,
 } from '@mui/material';
 import { useDispatch } from 'react-redux';
 import { loginUser, registerUser } from '../authSlice';
@@ -43,6 +45,8 @@ const AuthForm = ({ isLogin }) => {
   });
 
   const [showPassword, setShowPassword] = useState(false);
+  const [error, setError] = useState('');
+  const [showError, setShowError] = useState(false);
 
   const handleChange = (e) => {
     const { name, value, type, checked } = e.target;
@@ -54,12 +58,19 @@ const AuthForm = ({ isLogin }) => {
 
   const handleSubmit = async (e) => {
     e.preventDefault();
+    let result;
     if (isLogin) {
-      await dispatch(loginUser(form));
+      result = await dispatch(loginUser(form));
     } else {
-      await dispatch(registerUser(form));
+      result = await dispatch(registerUser(form));
     }
-    navigate('/communities');
+    // Only navigate if login/register succeeded
+    if (!result.error) {
+      navigate('/communities');
+    } else {
+      setError(result.payload || 'Invalid credentials');
+      setShowError(true);
+    }
   };
 
   return (
@@ -78,8 +89,6 @@ const AuthForm = ({ isLogin }) => {
           boxShadow: 3,
         }}
       >
-        
-
         {!isLogin && (
           <>
             <TextField
@@ -215,18 +224,34 @@ const AuthForm = ({ isLogin }) => {
           type="submit"
           variant="contained"
           sx={{
-    borderRadius: 2,
-    py: 1.5,
-    mt: 1,
-    backgroundColor: '#4a148c',
-    '&:hover': {
-      backgroundColor: '#38006b',
-    },
-  }}
->
+            borderRadius: 2,
+            py: 1.5,
+            mt: 1,
+            backgroundColor: '#4a148c',
+            '&:hover': {
+              backgroundColor: '#38006b',
+            },
+          }}
+        >
           {isLogin ? 'Login' : 'Register'}
         </Button>
       </Box>
+
+      {/* Snackbar for error messages */}
+      <Snackbar
+        open={showError}
+        autoHideDuration={4000}
+        onClose={() => setShowError(false)}
+        anchorOrigin={{ vertical: 'top', horizontal: 'center' }}
+      >
+        <Alert
+          onClose={() => setShowError(false)}
+          severity="error"
+          sx={{ width: '100%' }}
+        >
+          {error}
+        </Alert>
+      </Snackbar>
     </Container>
   );
 };

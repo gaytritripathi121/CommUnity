@@ -23,7 +23,18 @@ export const registerUser = createAsyncThunk('auth/register', async (data, thunk
 const authSlice = createSlice({
   name: 'auth',
   initialState: { user: null, loading: false, error: null },
-  reducers: {},
+  reducers: {
+    rehydrateUser: (state, action) => {
+      state.user = action.payload;
+      state.loading = false;
+      state.error = null;
+    },
+    logout: (state) => {
+      state.user = null;
+      state.loading = false;
+      state.error = null;
+    }
+  },
   extraReducers: (builder) => {
     builder
       // Login
@@ -33,16 +44,15 @@ const authSlice = createSlice({
       })
       .addCase(loginUser.fulfilled, (state, action) => {
         state.loading = false;
-        state.user = action.payload.user || action.payload; // adjust if needed
+        state.user = action.payload.user || action.payload;
         state.error = null;
 
         if (action.payload && action.payload.token) {
-          localStorage.setItem('token', action.payload.token); // Save token
+          localStorage.setItem('token', action.payload.token);
         }
         if (action.payload && action.payload.user && action.payload.user._id) {
-          localStorage.setItem('userId', action.payload.user._id); // Save userId
+          localStorage.setItem('userId', action.payload.user._id);
         } else if (action.payload && action.payload._id) {
-          // fallback if user object is not nested
           localStorage.setItem('userId', action.payload._id);
         }
       })
@@ -57,14 +67,14 @@ const authSlice = createSlice({
       })
       .addCase(registerUser.fulfilled, (state, action) => {
         state.loading = false;
-        state.user = action.payload.user || action.payload; // adjust if needed
+        state.user = action.payload.user || action.payload;
         state.error = null;
 
         if (action.payload && action.payload.token) {
-          localStorage.setItem('token', action.payload.token); // Save token
+          localStorage.setItem('token', action.payload.token);
         }
         if (action.payload && action.payload.user && action.payload.user._id) {
-          localStorage.setItem('userId', action.payload.user._id); // Save userId
+          localStorage.setItem('userId', action.payload.user._id);
         } else if (action.payload && action.payload._id) {
           localStorage.setItem('userId', action.payload._id);
         }
@@ -76,4 +86,5 @@ const authSlice = createSlice({
   },
 });
 
+export const { rehydrateUser, logout } = authSlice.actions;
 export default authSlice.reducer;

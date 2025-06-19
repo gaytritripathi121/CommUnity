@@ -5,7 +5,8 @@ import {
   deleteAccount,
   getUserProfile,
   updateUserProfile,
-  upload
+  upload,
+  blockUser
 } from './auth.controller.js';
 import { protect } from '../../middleware/authMiddleware.js';
 
@@ -18,5 +19,8 @@ router.delete('/me', protect, deleteAccount);
 // User profile routes
 router.get('/profile/:id', protect, getUserProfile);
 router.put('/profile/:id', protect, upload.single('avatar'), updateUserProfile);
+
+// Block user
+router.post('/block/:id', protect, blockUser);
 
 export default router;

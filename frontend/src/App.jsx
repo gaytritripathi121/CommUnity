@@ -1,6 +1,8 @@
-import React, { useState, useMemo } from 'react';
+import React, { useMemo, useEffect } from 'react';
 import { BrowserRouter as Router, Routes, Route, useParams } from 'react-router-dom';
 import { ThemeProvider, createTheme, CssBaseline } from '@mui/material';
+import { useDispatch, useSelector } from 'react-redux';
+import { rehydrateUser, logout } from './modules/auth/authSlice'; // adjust path as needed
 
 import LoginPage from './modules/auth/LoginPage';
 import RegisterPage from './modules/auth/RegisterPage';
@@ -15,18 +17,39 @@ import SettingsPage from './modules/auth/SettingsPage';
 import UserProfilePage from './modules/user/UserProfilePage';
 import ChatPage from './modules/chat/ChatPage';
 import EditProfilePage from './modules/user/EditProfilePage';
-
 import CommunitySettings from './modules/community/CommunitySettings';
 import CommunityMembersPage from './modules/community/CommunityMembersPage';
 
 const App = () => {
-  const [isLoggedIn, setIsLoggedIn] = useState(true);
-  const [isDarkMode, setIsDarkMode] = useState(false);
+  const [isDarkMode, setIsDarkMode] = React.useState(false);
+
+  const dispatch = useDispatch();
+  const user = useSelector((state) => state.auth.user);
+
+  // Rehydrate user from localStorage on app load
+  useEffect(() => {
+    const token = localStorage.getItem('token');
+    const userId = localStorage.getItem('userId');
+    if (token && userId && !user) {
+      import('./modules/user/UserAPI').then(({ default: UserAPI }) => {
+        UserAPI.getUser(userId)
+          .then(userData => {
+            dispatch(rehydrateUser({ ...userData, token }));
+          })
+          .catch(() => {
+            localStorage.removeItem('token');
+            localStorage.removeItem('userId');
+            dispatch(logout());
+          });
+      });
+    }
+  }, [dispatch, user]);
 
   const handleLogout = () => {
-    setIsLoggedIn(false);
     localStorage.removeItem('token');
     localStorage.removeItem('userId');
+    dispatch(logout());
+    // Optionally, redirect to login page here
   };
 
   const toggleTheme = () => setIsDarkMode((prev) => !prev);
@@ -60,7 +83,7 @@ const App = () => {
     <ThemeProvider theme={theme}>
       <CssBaseline />
       <Router>
-        <Navbar isLoggedIn={isLoggedIn} onLogout={handleLogout} />
+        <Navbar isLoggedIn={!!user} onLogout={handleLogout} />
         <Routes>
           <Route path="/login" element={<LoginPage />} />
           <Route path="/register" element={<RegisterPage />} />

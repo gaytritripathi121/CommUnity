@@ -7,14 +7,9 @@ import {
   Tab,
   Box,
   Snackbar,
-  Avatar,
   Button,
   Paper,
   Divider,
-  Stack,
-  Chip,
-  Tooltip,
-  Fade,
 } from '@mui/material';
 import { Link } from 'react-router-dom';
 import JoinButton from './components/JoinButton';
@@ -63,25 +58,17 @@ const CommunityDetail = ({ communityId }) => {
   if (!community) {
     return (
       <Box sx={{ p: 6, textAlign: 'center' }}>
-        {/* Optionally, you can show a generic back button here */}
         <Typography variant="h6" color="text.secondary">Loading community...</Typography>
       </Box>
     );
   }
 
-  // Category route for back navigation
   const categoryRoute = `/communities/category/${encodeURIComponent(community.type)}`;
 
   return (
     <Container maxWidth="md" sx={{ py: 5 }}>
-      {/* Back Button to category page */}
-      <BackButton
-        label="Back to Category"
-        to={categoryRoute}
-        sx={{ mb: 3 }}
-      />
+      <BackButton label="Back to Category" to={categoryRoute} sx={{ mb: 3 }} />
 
-      {/* Banner & Header with gradient overlay */}
       <Paper
         elevation={8}
         sx={{
@@ -127,7 +114,6 @@ const CommunityDetail = ({ communityId }) => {
         </Box>
       </Paper>
 
-      {/* Join Button centered */}
       <Box sx={{ textAlign: 'center', mb: 5 }}>
         <JoinButton
           communityId={communityId}
@@ -148,7 +134,6 @@ const CommunityDetail = ({ communityId }) => {
         />
       </Box>
 
-      {/* Tabs with accent colors */}
       <Paper elevation={4} sx={{ borderRadius: 3 }}>
         <Tabs
           value={tabValue}
@@ -241,7 +226,6 @@ const CommunityDetail = ({ communityId }) => {
         </Box>
       </Paper>
 
-      {/* Snackbar */}
       <Snackbar
         open={snackbar.open}
         message={snackbar.message}

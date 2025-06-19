@@ -8,7 +8,10 @@ import {
   Chip,
   Box,
   Divider,
+  Avatar,
+  Tooltip
 } from '@mui/material';
+import InsertDriveFileIcon from '@mui/icons-material/InsertDriveFile';
 import axios from '../../../shared/axios';
 import ReactionButtons from './ReactionButtons';
 import PostActions from './PostActions';
@@ -40,7 +43,6 @@ const PostList = ({ communityId, type, isAdmin }) => {
 
   return (
     <Stack spacing={3}>
-      {/* Admin-only post box */}
       <CreatePost communityId={communityId} onPostCreated={handlePostCreated} isAdmin={isAdmin} />
 
       {posts.map((post) => (
@@ -63,6 +65,11 @@ const PostList = ({ communityId, type, isAdmin }) => {
         >
           <CardContent>
             <Stack direction="row" alignItems="center" spacing={1} sx={{ mb: 1 }}>
+              <Avatar
+                src={post.author.avatar || '/assets/default-avatar.png'}
+                alt={post.author.name}
+                sx={{ width: 36, height: 36, mr: 1 }}
+              />
               <Typography variant="subtitle1" fontWeight="bold" color="#6a1b9a">
                 {post.author.name}
               </Typography>
@@ -71,6 +78,56 @@ const PostList = ({ communityId, type, isAdmin }) => {
                 <PostActions post={post} communityId={communityId} isAdmin={isAdmin} onUpdate={handlePostCreated} />
               </Box>
             </Stack>
+
+            {/* Show attachments */}
+            {post.attachments && post.attachments.length > 0 && (
+              <Stack direction="row" spacing={2} sx={{ mb: 2, flexWrap: 'wrap' }}>
+                {post.attachments.map((file, idx) =>
+                  file.mimetype && file.mimetype.startsWith('image/') ? (
+                    <Avatar
+                      key={idx}
+                      variant="rounded"
+                      src={file.url}
+                      alt={file.originalname}
+                      sx={{
+                        width: 120,
+                        height: 80,
+                        borderRadius: 2,
+                        boxShadow: 1,
+                        mr: 1,
+                        mb: 1,
+                      }}
+                    />
+                  ) : (
+                    <Box
+                      key={idx}
+                      sx={{
+                        display: 'flex',
+                        alignItems: 'center',
+                        bgcolor: '#f3e5f5',
+                        px: 1.5,
+                        py: 0.5,
+                        borderRadius: 2,
+                        mr: 1,
+                        mb: 1,
+                      }}
+                    >
+                      <Tooltip title={file.originalname}>
+                        <InsertDriveFileIcon sx={{ color: '#7b1fa2', mr: 1 }} />
+                      </Tooltip>
+                      <a
+                        href={file.url}
+                        target="_blank"
+                        rel="noopener noreferrer"
+                        style={{ color: '#6a1b9a', fontWeight: 'bold' }}
+                      >
+                        {file.originalname}
+                      </a>
+                    </Box>
+                  )
+                )}
+              </Stack>
+            )}
 
             <Typography variant="body1" paragraph sx={{ whiteSpace: 'pre-line', fontSize: '1.05rem' }}>
               {post.content}

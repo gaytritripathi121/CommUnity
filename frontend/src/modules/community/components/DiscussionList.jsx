@@ -26,6 +26,8 @@ function buildTree(posts) {
   return { tree, map };
 }
 
+const currentUserId = localStorage.getItem('userId');
+
 const CommentNode = ({ node, communityId, onReply, parentMap }) => {
   if (!node) return null;
 
@@ -121,31 +123,34 @@ const CommentNode = ({ node, communityId, onReply, parentMap }) => {
         >
           Reply
         </Button>
-        <Button
-          size="small"
-          variant="outlined"
-          color="error"
-          onClick={handleDelete}
-          sx={{
-            fontWeight: 600,
-            textTransform: 'none',
-            borderRadius: 2,
-            borderWidth: 2,
-            px: 2.5,
-            py: 0.5,
-            minWidth: 90,
-            minHeight: 32,
-            letterSpacing: 0.5,
-            ml: 1,
-            '&:hover': {
-              backgroundColor: '#ffebee',
-              borderColor: '#d32f2f',
-            },
-            color: '#d32f2f',
-          }}
-        >
-          Delete
-        </Button>
+        {/* Only show Delete if current user is the author */}
+        {node.author._id === currentUserId && (
+          <Button
+            size="small"
+            variant="outlined"
+            color="error"
+            onClick={handleDelete}
+            sx={{
+              fontWeight: 600,
+              textTransform: 'none',
+              borderRadius: 2,
+              borderWidth: 2,
+              px: 2.5,
+              py: 0.5,
+              minWidth: 90,
+              minHeight: 32,
+              letterSpacing: 0.5,
+              ml: 1,
+              '&:hover': {
+                backgroundColor: '#ffebee',
+                borderColor: '#d32f2f',
+              },
+              color: '#d32f2f',
+            }}
+          >
+            Delete
+          </Button>
+        )}
       </Stack>
 
       {showReplyForm && (
@@ -175,9 +180,8 @@ const CommentNode = ({ node, communityId, onReply, parentMap }) => {
   );
 };
 
-const DiscussionList = ({ communityId }) => {
+const DiscussionList = ({ communityId, refresh = 0 }) => {
   const [posts, setPosts] = useState([]);
-  const [refresh, setRefresh] = useState(0);
 
   useEffect(() => {
     axios
@@ -205,7 +209,7 @@ const DiscussionList = ({ communityId }) => {
           key={discussion._id}
           node={discussion}
           communityId={communityId}
-          onReply={() => setRefresh(r => r + 1)}
+          onReply={() => setPosts([])} // Optionally, you can trigger a refresh here too
           parentMap={map}
         />
       ))}

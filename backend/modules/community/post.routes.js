@@ -8,26 +8,20 @@ import {
   addReaction
 } from './post.controller.js';
 import { protect } from '../../middleware/authMiddleware.js';
-import upload from '../../middleware/multerCloudinary.js'; // Updated import
+import upload from '../../middleware/multerCloudinary.js';
 
 const router = express.Router({ mergeParams: true });
 
-// All routes now start with /api/communities
-
-// Create a post (with attachments) and get posts
 router.route('/:communityId/posts')
-  .post(protect, upload.array('attachments', 5), createPost)
+  .post(protect, upload.array('attachments', 10), createPost)
   .get(getPosts);
 
-// Get replies for a post
 router.get('/:communityId/posts/:postId/replies', getReplies);
 
-// Edit or delete a post
 router.route('/:communityId/posts/:postId')
   .put(protect, editPost)
   .delete(protect, deletePost);
 
-// Add a reaction to a post
 router.post('/:communityId/posts/:postId/reactions', protect, addReaction);
 
 export default router;

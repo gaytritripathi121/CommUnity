@@ -18,8 +18,6 @@ connectDB();
 const app = express();
 const upload = multer({ storage: multer.memoryStorage() });
 const __dirname = path.resolve();
-
-// Test upload endpoint (optional)
 app.post('/test-upload', upload.array('attachments', 5), (req, res) => {
   console.log('BODY:', req.body);
   console.log('FILES:', req.files);
@@ -51,32 +49,34 @@ app.use((err, req, res, next) => {
   next(err);
 });
 
-// --- GLOBAL ERROR HANDLER (for unexpected errors) ---
+// --- GLOBAL ERROR HANDLER (add this just before app.listen) ---
 app.use((err, req, res, next) => {
+  // Log the full error stack to your backend terminal
   console.error('--- GLOBAL ERROR HANDLER ---');
   console.error(err.stack || err);
 
+  // Send error details to client (don't send stack in production)
   res.status(err.status || 500).json({
     message: err.message || 'Internal Server Error',
     // error: err.stack, // Uncomment for debugging, comment out in production
   });
 });
 // --------------------------------------------------------------
-
-// Serve frontend in production
 if (process.env.NODE_ENV === "production") {
-  const frontendPath = path.join(__dirname, "../frontend/dist"); // adjust if your build is elsewhere
+  const frontendPath = path.join(__dirname, "../frontend/dist");
   app.use(express.static(frontendPath));
 
-  // Correct SPA catch-all for Express 5.x+
-  app.get('/:splat(*)', (req, res) => {
-    res.sendFile(path.join(frontendPath, 'index.html'));
+  // Safe wildcard route to avoid path-to-regexp crash
+  app.get(/.*/, (req, res) => {
+    res.sendFile(path.join(frontendPath, "index.html"));
   });
 }
 
-// NotFound and errorHandler go after the SPA catch-all
 app.use(notFound);
 app.use(errorHandler);
+
+
+
 
 const PORT = process.env.PORT || 5000;
 app.listen(PORT, () => console.log(`Server running on port ${PORT}`));

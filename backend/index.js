@@ -18,6 +18,8 @@ connectDB();
 const app = express();
 const upload = multer({ storage: multer.memoryStorage() });
 const __dirname = path.resolve();
+
+// Test upload endpoint (can be removed in production)
 app.post('/test-upload', upload.array('attachments', 5), (req, res) => {
   console.log('BODY:', req.body);
   console.log('FILES:', req.files);
@@ -61,20 +63,19 @@ app.use((err, req, res, next) => {
     // error: err.stack, // Uncomment for debugging, comment out in production
   });
 });
-// --------------------------------------------------------------
+
+// Serve frontend in production
+if (process.env.NODE_ENV === "production") {
+  const frontendPath = path.join(__dirname, "../frontend/dist"); // or "../client/build" if that's where your build is
+  app.use(express.static(frontendPath));
+
+  app.get('*', (req, res) => {
+    res.sendFile(path.join(frontendPath, 'index.html'));
+  });
+}
 
 app.use(notFound);
 app.use(errorHandler);
-
-if (process.env.NODE_ENV === "production") {
-  const frontendPath = path.join(__dirname, "../frontend/dist");
-  app.use(express.static(frontendPath));
-
-  // Safe wildcard route to avoid path-to-regexp crash
-  app.get("/{*splat}", (req, res) => {
-    res.sendFile(path.join(frontendPath, "index.html"));
-  });
-}
 
 const PORT = process.env.PORT || 5000;
 app.listen(PORT, () => console.log(`Server running on port ${PORT}`));

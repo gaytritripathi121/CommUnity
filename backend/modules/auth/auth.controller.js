@@ -102,8 +102,7 @@ const blockUser = async (req, res) => {
   if (blockerId.toString() === blockedId) {
     return res.status(400).json({ message: "You can't block yourself." });
   }
-  // Add your block logic here (e.g., add to blockedUsers array)
-  // For demo:
+  
   res.json({ message: 'User blocked (demo, implement logic as needed).' });
 };
 

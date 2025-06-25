@@ -108,7 +108,7 @@ const CommunityCard = ({ community }) => {
           </Typography>
           <Stack direction="row" spacing={1}>
             <Chip label="Active" color="success" size="small" />
-            {/* Add more chips for tags, members, etc. */}
+           
           </Stack>
         </CardContent>
       </CardActionArea>

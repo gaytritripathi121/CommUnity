@@ -26,7 +26,6 @@ const App = () => {
   const dispatch = useDispatch();
   const user = useSelector((state) => state.auth.user);
 
-  // Rehydrate user from localStorage on app load
   useEffect(() => {
     const token = localStorage.getItem('token');
     const userId = localStorage.getItem('userId');
@@ -49,7 +48,6 @@ const App = () => {
     localStorage.removeItem('token');
     localStorage.removeItem('userId');
     dispatch(logout());
-    // Optionally, redirect to login page here
   };
 
   const toggleTheme = () => setIsDarkMode((prev) => !prev);

@@ -49,7 +49,7 @@ app.use((err, req, res, next) => {
   next(err);
 });
 
-// --- GLOBAL ERROR HANDLER (add this just before app.listen) ---
+
 app.use((err, req, res, next) => {
   // Log the full error stack to your backend terminal
   console.error('--- GLOBAL ERROR HANDLER ---');
@@ -61,12 +61,12 @@ app.use((err, req, res, next) => {
     // error: err.stack, // Uncomment for debugging, comment out in production
   });
 });
-// --------------------------------------------------------------
+
 if (process.env.NODE_ENV === "production") {
   const frontendPath = path.join(__dirname, "../frontend/dist");
   app.use(express.static(frontendPath));
 
-  // Safe wildcard route to avoid path-to-regexp crash
+  
   app.get(/.*/, (req, res) => {
     res.sendFile(path.join(frontendPath, "index.html"));
   });

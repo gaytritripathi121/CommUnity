@@ -6,12 +6,12 @@ import GroupIcon from '@mui/icons-material/Group';
 import Diversity3Icon from '@mui/icons-material/Diversity3';
 import EmojiPeopleIcon from '@mui/icons-material/EmojiPeople';
 
-// Map community types to icons (add more as needed)
+
 const typeIcons = {
   Social: <GroupIcon fontSize="large" sx={{ color: '#4a148c' }} />,
   Environmental: <Diversity3Icon fontSize="large" sx={{ color: '#4a148c' }} />,
   Charity: <EmojiPeopleIcon fontSize="large" sx={{ color: '#4a148c' }} />,
-  // Add other types with icons here...
+ 
 };
 
 const CommunitiesHomePage = () => {

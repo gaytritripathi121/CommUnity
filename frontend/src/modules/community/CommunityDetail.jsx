@@ -50,7 +50,6 @@ const CommunityDetail = ({ communityId }) => {
 
   useEffect(() => {
     fetchCommunity();
-    // eslint-disable-next-line
   }, [communityId]);
 
   const handleTabChange = (event, newValue) => setTabValue(newValue);

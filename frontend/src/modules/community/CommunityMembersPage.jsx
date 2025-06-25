@@ -33,7 +33,6 @@ const CommunityMembersPage = () => {
 
   useEffect(() => {
     fetchCommunity();
-    // eslint-disable-next-line
   }, [id, currentUserId]);
 
   const handlePromote = async (userId) => {

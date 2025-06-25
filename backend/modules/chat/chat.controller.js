@@ -18,7 +18,7 @@ export const getMessages = async (req, res) => {
     .sort('timestamp')
     .populate('sender', 'name avatar'); // Populate sender's name and avatar fields only
 
-    // Format messages to include senderName and senderAvatar for frontend convenience
+   
     const formattedMessages = messages.map(msg => ({
       _id: msg._id,
       text: msg.text,
@@ -35,7 +35,7 @@ export const getMessages = async (req, res) => {
   }
 };
 
-// Send a message (with optional image)
+
 export const sendMessage = async (req, res) => {
   try {
     let imageUrl = null;

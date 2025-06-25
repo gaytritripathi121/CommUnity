@@ -8,7 +8,7 @@ const JoinButton = ({ communityId, isMember, onJoin }) => {
   const handleJoin = async () => {
     setLoading(true);
     try {
-      // Use the correct endpoint (add /api if your axios baseURL is not '/api')
+    
       await axios.post(`/communities/${communityId}/join`);
       onJoin();
     } catch (err) {

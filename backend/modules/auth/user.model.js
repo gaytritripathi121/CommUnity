@@ -10,7 +10,7 @@ const userSchema = new mongoose.Schema({
   interests: [String],
   badges: [String],
   communities: [{ type: mongoose.Schema.Types.ObjectId, ref: 'Community' }],
-  // blockedUsers: [{ type: mongoose.Schema.Types.ObjectId, ref: 'User' }], // For block logic
+  
 }, { timestamps: true });
 
 export default mongoose.model('User', userSchema);
